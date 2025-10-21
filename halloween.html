@@ -100,7 +100,7 @@
     <div class="whiteout" id="whiteout"></div>
 
     <!-- ギャラリーへ -->
-    <a class="cta" id="enter" href="index.html">ギャラリーへ入る</a>
+    <a id="enterBtn" class="cta">ギャラリーへ入る</a>
   </div>
 
   <script>
@@ -221,7 +221,10 @@
       await wait(1500); // ←追加！
 
       // 4）「ギャラリーへ入る」ボタン表示 + 自動遷移設定
-      
+      enterBtn.classList.add('show');
+      enterBtn.onclick = () => {
+      window.location.href = "https://devilangelzero54-cmd.github.io/gallery/index.html";
+     };
 
       if (T.autoJump != null) {
       setTimeout(() => {

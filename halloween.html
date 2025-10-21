@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Halloween Intro</title>
+  <style>
+    :root{
+      /* —— 調整しやすいように基準時間をCSS変数でも持っておく（任意） —— */
+      --bg: #000;
+      --accent: #ffa500;
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: var(--bg);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Hiragino Sans", "Noto Sans JP", sans-serif;
+      color: var(--accent);
+      overflow: hidden;
+    }
+
+    .stage {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: grid;
+      place-items: center;
+      background: #000;           /* 開始は黒背景 */
+    }
+
+    /* メインの絵（カボチャ／扉）を載せるレイヤー */
+    #main {
+      width: min(80vw, 520px);
+      max-width: 92vw;
+      height: auto;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+      image-rendering: auto;
+      will-change: opacity;
+      z-index: 2;
+    }
+
+    /* ホワイトアウト用オーバーレイ */
+    .whiteout {
+      position: absolute;
+      inset: 0;
+      background: #fff;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.6s ease;
+      z-index: 3;
+    }
+
+    /* 最後にフェードインする静止イラスト */
+    #final {
+      position: absolute;
+      inset: 0;
+      margin: auto;
+      width: min(85vw, 680px);
+      max-width: 92vw;
+      height: auto;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+      z-index: 4;
+    }
+
+    /* 最後に出すボタン */
+    .cta {
+      position: absolute;
+      bottom: clamp(16px, 5vh, 48px);
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 14px 22px;
+      border-radius: 12px;
+      font-weight: 700;
+      text-decoration: none;
+      background: #4B0082;   /* 深い紫 */
+      color: #FFA500;        /* オレンジ文字 */
+      border: 2px solid #FFA500;
+      box-shadow: 0 4px 18px rgba(0,0,0,.35);
+      opacity: 0;
+      transition: opacity .6s ease, transform .2s ease;
+      z-index: 5;
+      user-select: none;
+    }
+    .cta:hover { transform: translateX(-50%) translateY(-2px); }
+    .cta.show { opacity: 1; }
+
+    /* タイトル（演出中に薄く表示してもOKなら） */
+    .title {
+      position: absolute;
+      top: clamp(8px, 4vh, 32px);
+      width: 100%;
+      text-align: center;
+      font-weight: 800;
+      letter-spacing: .04em;
+      text-shadow: 0 0 10px rgba(255,140,0,.55);
+      opacity: .85;
+      z-index: 1;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="stage" id="stage">
+    <div class="title">HALLOWEEN NIGHT</div>
+
+    <!-- カボチャ／扉 用の表示ターゲット -->
+    <img id="main" alt="scene"/>
+
+    <!-- 白フラッシュ用 -->
+    <div class="whiteout" id="whiteout"></div>
+
+    <!-- 最後に出す静止イラスト -->
+    <img id="final" src="images/final.png" alt="final"/>
+
+    <!-- ギャラリーへ -->
+    <a class="cta" id="enter" href="index.html">ギャラリーへ入る</a>
+  </div>
+
+  <script>
+    // ===== 画像パス（あなたが用意したファイル名に合わせています） =====
+    const IMG = {
+      P_OFF:  "images/pumpkin_off.png",
+      P_H1:   "images/pumpkin_half_1.png",
+      P_H2:   "images/pumpkin_half_2.png",
+      P_ON:   "images/pumpkin_on.png",
+      D_C:    "images/door_closed.png",
+      D_Q:    "images/door_quarteropen.png",
+      D_H:    "images/door_half.png",
+      D_O:    "images/door_open.png",
+      D_F:    "images/door_fullopen.png",
+      FINAL:  "images/final.png",
+    };
+
+    // ===== 調整しやすい時間（ミリ秒） =====
+    const T = {
+      fadeFast:   300,
+      fade:       600,
+      holdShort:  300,
+      hold:       700,
+      holdLong:   1000,
+
+      // 導入テンポ
+      pumpkinHold1: 1000,  // offの最初の静止
+      blinkStep:    280,   // halfの切替テンポ
+      blinkShort:   240,
+      blinkHoldOn:  480,
+
+      // 扉のテンポ
+      doorPause:   1100,   // 扉を見せる間
+      doorStep:     360,   // 開いていく各コマ間隔
+
+      // 最後の見せ時間と自動遷移まで
+      finalHold:   1800,
+      autoJump:    3000    // ボタン表示後、自動でギャラリーへ（ms）。自動遷移したくなければ null に。
+    };
+
+    // ===== 便利関数：プリロード =====
+    function preload(srcList){
+      return Promise.all(srcList.map(src =>
+        new Promise(res => { const i = new Image(); i.onload = res; i.onerror = res; i.src = src; })
+      ));
+    }
+
+    // ===== 便利関数：画像のフェード表示／非表示 =====
+    function setSrc(el, src){ el.src = src; }
+    function fadeIn(el, ms){ el.style.transitionDuration = ms+'ms'; el.style.opacity = 1; return new Promise(r=>setTimeout(r, ms)); }
+    function fadeOut(el, ms){ el.style.transitionDuration = ms+'ms'; el.style.opacity = 0; return new Promise(r=>setTimeout(r, ms)); }
+    const wait = ms => new Promise(r=>setTimeout(r, ms));
+
+    // ===== 便利関数：白フラッシュ =====
+    async function whiteFlash(el, fadeMs = T.fade, holdMs = T.hold){
+      el.style.transitionDuration = fadeMs+'ms';
+      el.style.opacity = 1;
+      await wait(fadeMs + holdMs);
+      el.style.opacity = 0;
+      await wait(fadeMs);
+    }
+
+    (async function run(){
+      const main = document.getElementById('main');
+      const white = document.getElementById('whiteout');
+      const finalImg = document.getElementById('final');
+      const enterBtn = document.getElementById('enter');
+
+      // まずプリロード
+      await preload(Object.values(IMG));
+
+      // 1) 黒背景 → カボチャ演出
+      setSrc(main, IMG.P_OFF);
+      await fadeIn(main, T.fade);                     // off フェードイン
+      await wait(T.pumpkinHold1);
+
+      setSrc(main, IMG.P_H1); await wait(T.blinkStep);
+      setSrc(main, IMG.P_H2); await wait(T.blinkStep);
+      setSrc(main, IMG.P_ON); await wait(T.blinkHoldOn);
+      setSrc(main, IMG.P_H2); await wait(T.blinkShort);
+      setSrc(main, IMG.P_ON); await wait(T.blinkShort);
+      setSrc(main, IMG.P_H2); await wait(T.blinkShort);
+      setSrc(main, IMG.P_H1); await wait(T.blinkShort);
+
+      setSrc(main, IMG.P_OFF);
+      await fadeOut(main, T.fade);                   // カボチャ退場
+      await wait(T.holdShort);
+
+      // 2) 扉シークエンス（黒背景のまま）
+      setSrc(main, IMG.D_C);
+      await fadeIn(main, T.fadeFast);
+      await wait(T.doorPause);
+
+      setSrc(main, IMG.D_Q); await wait(T.doorStep);
+      setSrc(main, IMG.D_H); await wait(T.doorStep);
+      setSrc(main, IMG.D_O); await wait(T.doorStep);
+      setSrc(main, IMG.D_F); await wait(T.doorStep + 120);
+
+      // 3) 白フラッシュ → 最終イラストをフェードイン
+      await whiteFlash(white, T.fade, T.hold);
+      setSrc(finalImg, IMG.FINAL);
+      await fadeIn(finalImg, 800);
+      await wait(T.finalHold);
+
+      // 4) 「ギャラリーへ入る」ボタン表示 ＋ 自動遷移（任意）
+      enterBtn.classList.add('show');
+
+      if (T.autoJump != null){
+        setTimeout(()=>{
+          // 自動遷移（index.html へ）
+          window.location.href = "index.html";
+        }, T.autoJump);
+      }
+
+      // ※ ユーザー操作（ボタン）でも index.html へ行けます
+    })();
+  </script>
+</body>
+</html>

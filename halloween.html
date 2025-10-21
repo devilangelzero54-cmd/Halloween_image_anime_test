@@ -219,10 +219,13 @@
       await fadeOut(main, 150);   // 扉を消す（フェードアウト）
       setSrc(main, "");           // srcを空にして再出現を防ぐ
       await whiteFlash(white, T.fade, T.hold);
-      setSrc(finalImg, IMG.FINAL);
-      await fadeIn(finalImg, 800);
-      await wait(T.finalHold);
+      
+      // 背景を白に固定
+      document.body.style.backgroundColor = "white";
 
+      // 扉などを完全に消しておく
+      setSrc(main, "");
+      
       // 4）「ギャラリーへ入る」ボタン表示 + 自動遷移設定
       enterBtn.classList.add('show');
       enterBtn.onclick = () => {

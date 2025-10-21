@@ -217,11 +217,7 @@
 
       // 3) 白フラッシュ → 最終イラストをフェードイン
       await fadeOut(main, 150);   // 扉を消す（フェードアウト）
-      setSrc(main, "");           // srcを空にして再出現を防ぐ
-      await whiteFlash(white, T.fade, T.hold);
-      
-      // 背景を白に固定
-      document.body.style.backgroundColor = "white";
+      setSrc(main, "");           // srcを空にして再出現を防止
       
       // ３) 白フラッシュ → 最終イラスト/ボタン へ の直後あたり
       await fadeOut(main, 150);

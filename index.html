@@ -218,11 +218,24 @@
       // 3) 白フラッシュ → 最終イラストをフェードイン
       await fadeOut(main, 150);   // 扉を消す（フェードアウト）
       setSrc(main, "");           // srcを空にして再出現を防ぐ
-      await whiteFlash(white, T.fade, T.hold);
-      setSrc(finalImg, IMG.FINAL);
-      await fadeIn(finalImg, 800);
-      await wait(T.finalHold);
+      // 白背景を強制固定（!important 相当）
+      document.documentElement.style.setProperty('background-color', '#fff', 'important');
+      document.body.style.setProperty('background-color', '#fff', 'important');
 
+      // もし白フラッシュ用のオーバーレイ(例: const white = document.getElementById('white'))を使ってるなら
+      // それも白のままにしておくと安全（透明にしない）
+      if (white) {
+      white.style.opacity = '1';
+      white.style.background = '#fff';
+      white.style.pointerEvents = 'none';  // クリックは透過
+     }
+      
+      // 白背景固定
+      document.body.style.backgroundColor = "white";
+
+      // 白のまま少し待機（例：1秒〜2秒）
+      await wait(1500); // ←追加！
+      
       // 4) 「ギャラリーへ入る」ボタン表示 ＋ 自動遷移（任意）
       enterBtn.classList.add('show');
 

@@ -214,6 +214,12 @@
       white.style.pointerEvents = 'none';  // クリックは透過
      }
       
+      // 白背景固定
+      document.body.style.backgroundColor = "white";
+
+      // 白のまま少し待機（例：1秒〜2秒）
+      await wait(1500); // ←追加！
+
       // 4）「ギャラリーへ入る」ボタン表示 + 自動遷移設定
       enterBtn.classList.add('show');
       enterBtn.onclick = () => {

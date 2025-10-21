@@ -235,16 +235,18 @@
 
       // 白のまま少し待機（例：1秒〜2秒）
       await wait(1500); // ←追加！
-      
-      // 4) 「ギャラリーへ入る」ボタン表示 ＋ 自動遷移（任意）
-      enterBtn.classList.add('show');
 
-      if (T.autoJump != null){
-        setTimeout(()=>{
-          // 自動遷移（index.html へ）
-          window.location.href = "index.html";
-        }, T.autoJump);
-      }
+      // 4）「ギャラリーへ入る」ボタン表示 + 自動遷移設定
+      enterBtn.classList.add('show');
+      enterBtn.onclick = () => {
+        window.location.href = "https://devilangelzero54-cmd.github.io/gallery/intro.html";
+        };
+      if (T.autoJump != null) {
+        setTimeout(() => {
+          // 自動遷移（intro.html へ）
+          window.location.href = "https://devilangelzero54-cmd.github.io/gallery/intro.html";
+          }, T.autoJump);
+        }
 
       // ※ ユーザー操作（ボタン）でも index.html へ行けます
     })();

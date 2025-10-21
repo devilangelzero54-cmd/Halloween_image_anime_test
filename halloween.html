@@ -51,20 +51,7 @@
       transition: opacity 0.6s ease;
       z-index: 3;
     }
-
-    /* 最後にフェードインする静止イラスト */
-    #final {
-      position: absolute;
-      inset: 0;
-      margin: auto;
-      width: min(85vw, 680px);
-      max-width: 92vw;
-      height: auto;
-      opacity: 0;
-      transition: opacity 0.8s ease;
-      z-index: 4;
-    }
-
+    
     /* 最後に出すボタン */
     .cta {
       position: absolute;
@@ -112,9 +99,6 @@
     <!-- 白フラッシュ用 -->
     <div class="whiteout" id="whiteout"></div>
 
-    <!-- 最後に出す静止イラスト -->
-    <img id="final" src="images/final.png" alt="final"/>
-
     <!-- ギャラリーへ -->
     <a class="cta" id="enter" href="index.html">ギャラリーへ入る</a>
   </div>
@@ -131,7 +115,6 @@
       D_H:    "images/door_half.png",
       D_O:    "images/door_open.png",
       D_F:    "images/door_fullopen.png",
-      FINAL:  "images/final.png",
     };
 
     // ===== 調整しやすい時間（ミリ秒） =====
@@ -215,13 +198,9 @@
       setSrc(main, IMG.D_O); await wait(T.doorStep);
       setSrc(main, IMG.D_F); await wait(T.doorStep + 120);
 
-      // 3) 白フラッシュ → 最終イラストをフェードイン
+      // 3) 白フラッシュ 
       await fadeOut(main, 150);   // 扉を消す（フェードアウト）
       setSrc(main, "");           // srcを空にして再出現を防止
-      
-      // ３) 白フラッシュ → 最終イラスト/ボタン へ の直後あたり
-      await fadeOut(main, 150);
-      setSrc(main, "");
 
       // 白背景を強制固定（!important 相当）
       document.documentElement.style.setProperty('background-color', '#fff', 'important');

@@ -116,7 +116,7 @@
     <img id="final" src="images/final.png" alt="final"/>
 
     <!-- ギャラリーへ -->
-    <a class="cta" id="enter" href="index.html">ギャラリーへ入る</a>
+    <a class="cta" id="enterBtn" href="index.html">ギャラリーへ入る</a>
   </div>
 
   <script>
@@ -239,12 +239,12 @@
       // 4）「ギャラリーへ入る」ボタン表示 + 自動遷移設定
       enterBtn.classList.add('show');
       enterBtn.onclick = () => {
-        window.location.href = "https://devilangelzero54-cmd.github.io/gallery/intro.html";
+        window.location.href = "https://devilangelzero54-cmd.github.io/gallery/index.html";
         };
       if (T.autoJump != null) {
         setTimeout(() => {
           // 自動遷移（intro.html へ）
-          window.location.href = "https://devilangelzero54-cmd.github.io/gallery/intro.html";
+          window.location.href = "https://devilangelzero54-cmd.github.io/gallery/index.html";
           }, T.autoJump);
         }
 

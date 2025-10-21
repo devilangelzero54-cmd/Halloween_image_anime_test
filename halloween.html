@@ -223,6 +223,22 @@
       // 背景を白に固定
       document.body.style.backgroundColor = "white";
       
+      // ３) 白フラッシュ → 最終イラスト/ボタン へ の直後あたり
+      await fadeOut(main, 150);
+      setSrc(main, "");
+
+      // 白背景を強制固定（!important 相当）
+      document.documentElement.style.setProperty('background-color', '#fff', 'important');
+      document.body.style.setProperty('background-color', '#fff', 'important');
+
+      // もし白フラッシュ用のオーバーレイ(例: const white = document.getElementById('white'))を使ってるなら
+      // それも白のままにしておくと安全（透明にしない）
+      if (white) {
+      white.style.opacity = '1';
+      white.style.background = '#fff';
+      white.style.pointerEvents = 'none';  // クリックは透過
+     }
+      
       // 4）「ギャラリーへ入る」ボタン表示 + 自動遷移設定
       enterBtn.classList.add('show');
       enterBtn.onclick = () => {

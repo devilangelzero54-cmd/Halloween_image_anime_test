@@ -201,10 +201,6 @@
       // 3) 白フラッシュ 
       await fadeOut(main, 150);   // 扉を消す（フェードアウト）
       setSrc(main, "");           // srcを空にして再出現を防止
-      // ★ 強制表示デバッグ（一時的）
-      enterBtn.style.opacity = '1';
-      enterBtn.style.display = 'inline-block';
-      enterBtn.style.outline = '3px solid red'; // 目視確認用、後で消す
       
       // 白背景を強制固定（!important 相当）
       document.documentElement.style.setProperty('background-color', '#fff', 'important');

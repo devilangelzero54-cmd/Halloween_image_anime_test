@@ -216,6 +216,8 @@
       setSrc(main, IMG.D_F); await wait(T.doorStep + 120);
 
       // 3) 白フラッシュ → 最終イラストをフェードイン
+      await fadeOut(main, 150);   // 扉を消す（フェードアウト）
+      setSrc(main, "");           // srcを空にして再出現を防ぐ
       await whiteFlash(white, T.fade, T.hold);
       setSrc(finalImg, IMG.FINAL);
       await fadeIn(finalImg, 800);

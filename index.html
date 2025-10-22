@@ -259,11 +259,11 @@ function typeSequence(){
       setSrc(main, IMG.D_F); await wait(T.doorStep + 120);
 
       // 3) 白フラッシュ → 背景を白に → 透過画像をポンポン積み上げ
-+      await whiteFlash(white, T.fade, T.hold);
-+      document.documentElement.style.background = '#fff';
-+      document.body.style.background = '#fff';
-+      await typeSequence();             // ここで pop_001〜012 を積み上げ表示
-+      await wait(T.finalHold);
+      await whiteFlash(white, T.fade, T.hold);
+      document.documentElement.style.background = '#fff';
+      document.body.style.background = '#fff';
+      await typeSequence();             // ここで pop_001〜012 を積み上げ表示
+      await wait(T.finalHold);
 
       // もし白フラッシュ用のオーバーレイ(例: const white = document.getElementById('white'))を使ってるなら
       // それも白のままにしておくと安全（透明にしない）

@@ -258,15 +258,13 @@ function typeSequence(){
       setSrc(main, IMG.D_O); await wait(T.doorStep);
       setSrc(main, IMG.D_F); await wait(T.doorStep + 120);
 
-      // 3) 白フラッシュ → 背景を白に → 透過画像をポンポン積み上げ
-      await whiteFlash(white, T.fade, T.hold);
-      // ★ここを追加：扉(#main)を即座に消して“再出現”を防止
-main.style.transitionDuration = '1ms';
-main.style.opacity = 0;
-main.style.visibility = 'hidden';
-main.src = ''; // 保険（再描画でも出ない）
-      document.documentElement.style.background = '#fff';
-      document.body.style.background = '#fff';
+      // 3) 白フラッシュ 
+      await fadeOut(main, 150);   // 扉を消す（フェードアウト）
+      setSrc(main, "");           // srcを空にして再出現を防止
+      
+      // 白背景を強制固定（!important 相当）
+      document.documentElement.style.setProperty('background-color', '#fff', 'important');
+      document.body.style.setProperty('background-color', '#fff', 'important');
 
       // もし白フラッシュ用のオーバーレイ(例: const white = document.getElementById('white'))を使ってるなら
       // それも白のままにしておくと安全（透明にしない）
@@ -281,8 +279,8 @@ main.src = ''; // 保険（再描画でも出ない）
 
       // 白のまま少し待機（例：1秒〜2秒）
       await wait(1500); // ←追加！
-
-      await typeSequence();             // ここで pop_001〜012 を積み上げ表示
+      
+      await typeSequence(); // ここで pop_001〜012 を積み上げ表示
       await wait(T.finalHold);
 
       // 4）「ギャラリーへ入る」ボタン表示 + 自動遷移設定

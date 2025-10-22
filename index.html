@@ -184,6 +184,43 @@
       el.style.opacity = 0;
       await wait(fadeMs);
     }
+    // --- タイプライタ画像＆タイミング定義 ---
+const TYPE = {
+  base: "images/",
+  files: [
+    "pop_001.png","pop_002.png","pop_003.png","pop_004.png","pop_005.png",
+    "pop_006.png","pop_007.png","pop_008.png","pop_009.png","pop_010.png",
+    "pop_011.png","pop_012.png"
+  ],
+  // 0.1秒刻み＋「Trick」「Trick or」で0.3秒ポーズ（合計≈1.6s）
+  times: [100,100,100,100,300, 100,300, 100,100,100,100,300]
+};
+
+// 事前プリロード（任意：run() の前でOK）
+(function preloadType(){
+  TYPE.files.forEach(f => { const im = new Image(); im.src = TYPE.base + f; });
+})();
+
+// 透過PNGを “積み上げ” で表示（フェードアウト無し）
+function typeSequence(){
+  return new Promise(async (resolve)=>{
+    const wrap = document.getElementById('typewrap');
+    // 念のためクリア
+    wrap.innerHTML = "";
+    for (let i=0; i<TYPE.files.length; i++){
+      const img = document.createElement('img');
+      img.className = 'type-layer';
+      img.alt = '';
+      img.src = TYPE.base + TYPE.files[i];
+      wrap.appendChild(img);
+      // レイアウト反映後に点灯
+      await new Promise(r=>requestAnimationFrame(r));
+      img.classList.add('show');
+      await wait(TYPE.times[i]);
+    }
+    resolve();
+  });
+}
 
     (async function run(){
       const main = document.getElementById('main');

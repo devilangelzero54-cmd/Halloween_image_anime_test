@@ -260,6 +260,11 @@ function typeSequence(){
 
       // 3) 白フラッシュ → 背景を白に → 透過画像をポンポン積み上げ
       await whiteFlash(white, T.fade, T.hold);
+      // ★ここを追加：扉(#main)を即座に消して“再出現”を防止
+main.style.transitionDuration = '1ms';
+main.style.opacity = 0;
+main.style.visibility = 'hidden';
+main.src = ''; // 保険（再描画でも出ない）
       document.documentElement.style.background = '#fff';
       document.body.style.background = '#fff';
 

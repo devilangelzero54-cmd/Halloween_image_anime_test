@@ -260,6 +260,7 @@ function typeSequence(){
 
       // 3) 白フラッシュ → 背景を白に → 透過画像をポンポン積み上げ
       await whiteFlash(white, T.fade, T.hold);
+      setSrc(main, "");
       document.documentElement.style.background = '#fff';
       document.body.style.background = '#fff';
 

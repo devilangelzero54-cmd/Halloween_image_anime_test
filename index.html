@@ -52,18 +52,24 @@
       z-index: 3;
     }
 
-    /* 最後にフェードインする静止イラスト */
-    #final {
+    /* タイプイラストのコンテナ（#final互換サイズ) */
+    #typewrap {
       position: absolute;
       inset: 0;
       margin: auto;
       width: min(85vw, 680px);
       max-width: 92vw;
       height: auto;
-      opacity: 0;
-      transition: opacity 0.8s ease;
       z-index: 4;
+      pointer-events:none;
     }
+    /* 1枚ずつ“積み上げ”る透過PNG */
+    .type-layer{
+      position:absolute; inset:0; margin:auto;
+      width:100%; height:auto; object-fit:contain;
+      opacity:0; transition:opacity .18s ease; /* 速めの点灯 */
+    }
+    .type-layer.show{ opacity:1; }
 
     /* 最後に出すボタン */
     .cta {

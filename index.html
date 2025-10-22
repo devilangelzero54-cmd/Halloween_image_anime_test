@@ -262,8 +262,6 @@ function typeSequence(){
       await whiteFlash(white, T.fade, T.hold);
       document.documentElement.style.background = '#fff';
       document.body.style.background = '#fff';
-      await typeSequence();             // ここで pop_001〜012 を積み上げ表示
-      await wait(T.finalHold);
 
       // もし白フラッシュ用のオーバーレイ(例: const white = document.getElementById('white'))を使ってるなら
       // それも白のままにしておくと安全（透明にしない）
@@ -278,6 +276,9 @@ function typeSequence(){
 
       // 白のまま少し待機（例：1秒〜2秒）
       await wait(1500); // ←追加！
+
+      await typeSequence();             // ここで pop_001〜012 を積み上げ表示
+      await wait(T.finalHold);
 
       // 4）「ギャラリーへ入る」ボタン表示 + 自動遷移設定
       enterBtn.classList.add('show');

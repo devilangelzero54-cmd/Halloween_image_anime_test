@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Winter Intro</title>
+<style>
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: #000;
+    overflow: hidden;
+  }
+
+  .stage {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    height: 100vh;
+    background: #000;
+  }
+
+  .stage img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+  }
+
+  /* 白フラッシュ */
+  .flash {
+    position: fixed;
+    inset: 0;
+    background: #fff;
+    opacity: 0;
+    transition: opacity 0.15s linear;
+    pointer-events: none;
+  }
+
+  .flash.on {
+    opacity: 1;
+  }
+</style>
+</head>
+<body>
+  <div class="stage">
+    <img id="scene" src="images/tree_01.png" alt="scene">
+  </div>
+  <div id="flash" class="flash"></div>
+
+<script>
+const img = document.getElementById("scene");
+const flash = document.getElementById("flash");
+
+const frames = [
+  // ツリー（消灯→点灯）
+  {src: "images/tree_01.png", d: 900},
+  {src: "images/tree_02.png", d: 900},
+  {src: "images/tree_03.png", d: 400},
+  {src: "images/tree_04.png", d: 200},
+  {src: "images/tree_03.png", d: 200},
+  {src: "images/tree_04.png", d: 200},
+  {src: "images/tree_03.png", d: 700},
+
+  // 扉（開いていく）
+  {src: "images/door_01.png", d: 350},
+  {src: "images/door_02.png", d: 350},
+  {src: "images/door_03.png", d: 350},
+  {src: "images/door_04.png", d: 350},
+  {src: "images/door_05.png", d: 350},
+  {src: "images/door_06.png", d: 350},
+  {src: "images/door_07.png", d: 350},
+
+  // 白フラッシュ → 白背景へ
+  {flash: true, d: 200}, // 画面を白く
+  {white: true, d: Infinity} // 白背景で停止
+];
+
+function play(frames, i = 0) {
+  if (i >= frames.length) return;
+  const f = frames[i];
+
+  if (f.flash) {
+    flash.classList.add("on");
+    setTimeout(() => flash.classList.remove("on"), f.d);
+  } else if (f.white) {
+    document.body.style.background = "#fff";
+    img.style.display = "none"; // 白背景で画像を消す
+  } else {
+    img.src = f.src;
+  }
+
+  if (Number.isFinite(f.d)) {
+    setTimeout(() => play(frames, i + 1), f.d);
+  }
+}
+
+play(frames);
+</script>
+</body>
+</html>

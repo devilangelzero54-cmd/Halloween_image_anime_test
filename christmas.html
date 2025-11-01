@@ -39,6 +39,21 @@
   .flash.on {
     opacity: 1;
   }
+  #gotoGallery {
+  display: none;
+  opacity: 0;
+  transition: opacity 1s ease;
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #000;
+  color: #fff;
+  padding: 15px 30px;
+  border-radius: 10px;
+  font-size: 1.2em;
+  text-decoration: none;
+}
 </style>
 </head>
 <body>
@@ -88,16 +103,27 @@ function play(frames, i = 0){
   if (f.flash){
     doFlash(f.d || 200);
 
-  } else if (f.white){
-    // 画面を完全に白固定
-    document.documentElement.style.background = "#fff";
-    document.body.style.background = "#fff";
-    if (stage) stage.style.background = "#fff";
-    img.style.display = "none";          // 画像を消す（or img.src = ""）
-  } else if (f.src){
-    img.src = f.src;
-    img.style.display = "";              // 念のため再表示
-  }
+  else if (f.white) {
+  // 白背景設定
+  document.documentElement.style.background = "#fff";
+  document.body.style.background = "#fff";
+  if (stage) stage.style.background = "#fff";
+  img.style.display = "none";
+
+  // 🎄 ギャラリーボタンを数秒後に表示
+  const btn = document.getElementById("gotoGallery");
+  setTimeout(() => {
+    if (btn) {
+      btn.style.display = "block";
+      btn.style.opacity = "1";
+    }
+  }, 2000); // ← 2秒後にボタン出現（好みに応じて調整）
+
+  // 🎁 さらに数秒後に自動遷移
+  setTimeout(() => {
+    window.location.href = "https://devilangelzero54-cmd.github.io/winter_gallery/";
+  }, 6000); // ← 白背景から6秒後に自動でギャラリーへ
+}
 
   if (Number.isFinite(f.d)){
     setTimeout(()=> play(frames, i+1), f.d);

@@ -50,6 +50,7 @@
 <script>
 const img = document.getElementById("scene");
 const flash = document.getElementById("flash");
+const stage = document.querySelector(".stage");  
 
 const frames = [
   // ツリー（消灯→点灯）
@@ -74,23 +75,32 @@ const frames = [
   {flash: true, d: 200}, // 画面を白く
   {white: true, d: Infinity} // 白背景で停止
 ];
-
-function play(frames, i = 0) {
+function doFlash(ms = 200){
+  flash.classList.remove('on');
+  void flash.offsetWidth;      // リフローで確実に発火
+  flash.classList.add('on');
+  setTimeout(()=> flash.classList.remove('on'), ms);
+}
+function play(frames, i = 0){
   if (i >= frames.length) return;
   const f = frames[i];
 
-  if (f.flash) {
-    flash.classList.add("on");
-    setTimeout(() => flash.classList.remove("on"), f.d);
-  } else if (f.white) {
+  if (f.flash){
+    doFlash(f.d || 200);
+
+  } else if (f.white){
+    // 画面を完全に白固定
+    document.documentElement.style.background = "#fff";
     document.body.style.background = "#fff";
-    img.style.display = "none"; // 白背景で画像を消す
-  } else {
+    if (stage) stage.style.background = "#fff";
+    img.style.display = "none";          // 画像を消す（or img.src = ""）
+  } else if (f.src){
     img.src = f.src;
+    img.style.display = "";              // 念のため再表示
   }
 
-  if (Number.isFinite(f.d)) {
-    setTimeout(() => play(frames, i + 1), f.d);
+  if (Number.isFinite(f.d)){
+    setTimeout(()=> play(frames, i+1), f.d);
   }
 }
 

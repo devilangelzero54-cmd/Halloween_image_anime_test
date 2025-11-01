@@ -1,137 +1,189 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Winter Intro</title>
-<style>
-  html, body {
-    margin: 0;
-    height: 100%;
-    background: #000;
-    overflow: hidden;
-  }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Christmas Intro → Gallery</title>
+  <style>
+    /* 画面全体の初期は黒背景（イントロ用） */
+    :root{
+      --btn-bg:#000;
+      --btn-fg:#fff;
+      --btn-radius:10px;
+    }
+    html,body{
+      margin:0;
+      padding:0;
+      height:100%;
+      background:#000;
+      color:#fff;
+      font-family: system-ui, -apple-system, "Noto Sans JP", sans-serif;
+      overflow:hidden; /* イントロ中はスクロールさせない */
+    }
 
-  .stage {
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-    height: 100vh;
-    background: #000;
-  }
+    /* 画像表示ステージ */
+    .stage{
+      position:relative;
+      width:100%;
+      height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#000; /* 白背景に切替後はJSでbody側も#fffに */
+    }
+    /* 画像は横幅基準でフィット（スマホ想定） */
+    #frame{
+      width:100%;
+      height:auto;
+      max-height:100%;
+      object-fit:contain;
+      display:block;
+    }
 
-  .stage img {
-    width: 100%;
-    height: auto;
-    object-fit: contain;
-  }
+    /* 白フラ用オーバーレイ */
+    .flash{
+      position:fixed;
+      inset:0;
+      background:#fff;
+      opacity:0;
+      pointer-events:none;
+      transition:opacity 120ms ease; /* フラッシュ速度 */
+    }
+    .flash.on{ opacity:1; }
 
-  /* 白フラッシュ */
-  .flash {
-    position: fixed;
-    inset: 0;
-    background: #fff;
-    opacity: 0;
-    transition: opacity 0.15s linear;
-    pointer-events: none;
-  }
+    /* ギャラリーボタン（初期は非表示） */
+    #gotoGallery{
+      position:fixed;
+      left:50%;
+      bottom:40px;
+      transform:translateX(-50%);
+      background:var(--btn-bg);
+      color:var(--btn-fg);
+      border:none;
+      border-radius:var(--btn-radius);
+      padding:14px 26px;
+      font-size:16px;
+      text-decoration:none;
+      display:none;        /* 後で block に */
+      opacity:0;           /* 後で 1 にフェード */
+      transition:opacity 600ms ease;
+      box-shadow:0 6px 20px rgba(0,0,0,.35);
+    }
+    #gotoGallery.show{ display:block; }
+    #gotoGallery.fadein{ opacity:1; }
 
-  .flash.on {
-    opacity: 1;
-  }
-  .gotoGallery {
-  display: none;
-  opacity: 0;
-  transition: opacity 1s ease;
-  position: fixed;
-  bottom: 40px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #000;
-  color: #fff;
-  padding: 15px 30px;
-  border-radius: 10px;
-  font-size: 1.2em;
-  text-decoration: none;
-}
-</style>
+    /* 白背景以降は文言が読めるように反転 */
+    .onWhite #gotoGallery{
+      --btn-bg:#111;
+      --btn-fg:#fff;
+    }
+  </style>
 </head>
 <body>
   <div class="stage">
-    <img id="scene" src="images/tree_01.png" alt="scene">
+    <img id="frame" alt="intro sequence" />
+    <div class="flash" id="flash"></div>
   </div>
-  <div id="flash" class="flash"></div>
+  <a id="gotoGallery" href="#" rel="noopener">ギャラリーへ</a>
 
-<script>
-const img = document.getElementById("scene");
-const flash = document.getElementById("flash");
-const stage = document.querySelector(".stage");  
+  <script>
+    /***********************
+     * 設定（必要に応じて変更）
+     ***********************/
+    const GALLERY_URL = "https://example.com/winter_gallery/";  // ←君のURLに変更
+    const FLASH_MS = 200;           // 白フラの明滅時間
+    const BTN_DELAY_MS = 1200;      // 白背景になってからボタンを出すまで
+    const AUTO_JUMP_MS = 3500;      // さらにこの時間後に自動遷移
 
-const frames = [
-  // ツリー（消灯→点灯）
-  {src: "images/tree_01.png", d: 900},
-  {src: "images/tree_02.png", d: 900},
-  {src: "images/tree_03.png", d: 400},
-  {src: "images/tree_04.png", d: 200},
-  {src: "images/tree_03.png", d: 200},
-  {src: "images/tree_04.png", d: 200},
-  {src: "images/tree_03.png", d: 700},
+    /* 画像フレーム列：
+       t: "img" | "flash" | "white"
+       d: 表示時間(ms)
+       src: 画像パス（t==="img" のとき）
+    */
+    const frames = [
+      /* ーー ツリー点灯シーケンス ーー */
+      { t:"img", src:"images/tree_01.png", d: 600 }, // 消灯
+      { t:"img", src:"images/tree_02.png", d: 400 }, // 点灯開始
+      { t:"img", src:"images/tree_03.png", d: 400 }, // 全点灯
+      { t:"img", src:"images/tree_04.png", d: 200 }, // 星だけ暗く
+      { t:"img", src:"images/tree_03.png", d: 200 }, // 全点灯
+      { t:"img", src:"images/tree_04.png", d: 200 }, // 星だけ暗く
+      { t:"img", src:"images/tree_03.png", d: 700 }, // 全点灯(待機気味)
 
-  // 扉（開いていく）
-  {src: "images/door_01.png", d: 350},
-  {src: "images/door_02.png", d: 350},
-  {src: "images/door_03.png", d: 350},
-  {src: "images/door_04.png", d: 350},
-  {src: "images/door_05.png", d: 350},
-  {src: "images/door_06.png", d: 350},
-  {src: "images/door_07.png", d: 350},
+      /* ーー ドア 1〜7 ーー */
+      { t:"img", src:"images/door_01.png", d: 350 },
+      { t:"img", src:"images/door_02.png", d: 350 },
+      { t:"img", src:"images/door_03.png", d: 350 },
+      { t:"img", src:"images/door_04.png", d: 350 },
+      { t:"img", src:"images/door_05.png", d: 350 },
+      { t:"img", src:"images/door_06.png", d: 350 },
+      { t:"img", src:"images/door_07.png", d: 350 },
 
-  // 白フラッシュ → 白背景へ
-  {flash: true, d: 200}, // 画面を白く
-  {white: true, d: Infinity} // 白背景で停止
-];
-function doFlash(ms = 200){
-  flash.classList.remove('on');
-  void flash.offsetWidth;      // リフローで確実に発火
-  flash.classList.add('on');
-  setTimeout(()=> flash.classList.remove('on'), ms);
-}
-function play(frames, i = 0){
-  if (i >= frames.length) return;
-  const f = frames[i];
+      /* ーー 白フラ → 白背景固定 ーー */
+      { t:"flash", d: FLASH_MS },
+      { t:"white", d: 0 }
+    ];
 
-  if (f.flash){
-    doFlash(f.d || 200);
+    const imgEl   = document.getElementById("frame");
+    const flashEl = document.getElementById("flash");
+    const btnEl   = document.getElementById("gotoGallery");
 
-  else if (f.white) {
-  // 白背景設定
-  document.documentElement.style.background = "#fff";
-  document.body.style.background = "#fff";
-  if (stage) stage.style.background = "#fff";
-  img.style.display = "none";
-  <a id="gotoGallery" href="https://devilangelzero54-cmd.github.io/winter_gallery/">❄️ ギャラリーへ ❄️</a>  
-
-  // 🎄 ギャラリーボタンを数秒後に表示
-  const btn = document.getElementById("gotoGallery");
-  setTimeout(() => {
-    if (btn) {
-      btn.style.display = "block";
-      btn.style.opacity = "1";
+    /* 画像の事前読み込み（フリーズ/黒抜け防止） */
+    function preload(list){
+      return Promise.all(
+        list
+          .filter(f => f.t === "img")
+          .map(f => new Promise(res => {
+            const im = new Image();
+            im.onload = im.onerror = res; // 404でも先へ進める
+            im.src = f.src;
+          }))
+      );
     }
-  }, 2000); // ← 2秒後にボタン出現（好みに応じて調整）
 
-  // 🎁 さらに数秒後に自動遷移
-  setTimeout(() => {
-    window.location.href = "https:";
-  }, 6000); // ← 白背景から6秒後に自動でギャラリーへ
-}
+    function whiteStage(){
+      document.body.style.background = "#fff";
+      document.body.classList.add("onWhite");
+      imgEl.style.display = "none";
+    }
 
-  if (Number.isFinite(f.d)){
-    setTimeout(()=> play(frames, i+1), f.d);
-  }
-}
+    function showButton(){
+      btnEl.href = GALLERY_URL;
+      btnEl.classList.add("show");
+      // レイアウト確定後にフェード
+      requestAnimationFrame(() => btnEl.classList.add("fadein"));
+    }
 
-play(frames);
-</script>
+    function autoJump(){
+      if (GALLERY_URL && GALLERY_URL !== "#") {
+        location.href = GALLERY_URL;
+      }
+    }
+
+    function play(frames, i=0){
+      if (i >= frames.length) return;
+
+      const f = frames[i];
+
+      if (f.t === "img") {
+        imgEl.style.display = "block";
+        imgEl.src = f.src;
+      } else if (f.t === "flash") {
+        flashEl.classList.add("on");
+        setTimeout(() => flashEl.classList.remove("on"), f.d);
+      } else if (f.t === "white") {
+        whiteStage();
+        // ボタン出現＆自動遷移をスケジュール
+        setTimeout(showButton, BTN_DELAY_MS);
+        setTimeout(autoJump,  BTN_DELAY_MS + AUTO_JUMP_MS);
+      }
+
+      const wait = Math.max(0, Number(f.d) || 0);
+      setTimeout(() => play(frames, i + 1), wait);
+    }
+
+    // 実行
+    preload(frames).then(() => play(frames));
+  </script>
 </body>
 </html>
